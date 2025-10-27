@@ -33,13 +33,13 @@ local RunService = game:GetService("RunService")
 
 local DefaultTheme = {
     -- Colors (using Color3.fromRGB)
-    Background = Color3.fromRGB(20, 20, 25),
-    TitleBar = Color3.fromRGB(30, 30, 40),
-    Section = Color3.fromRGB(25, 25, 30),
-    Button = Color3.fromRGB(45, 45, 55),
-    ButtonHover = Color3.fromRGB(60, 60, 75),
-    ButtonActive = Color3.fromRGB(70, 130, 180),
-    Slider = Color3.fromRGB(45, 45, 55),
+    Background = Color3.fromRGB(15, 15, 20),
+    TitleBar = Color3.fromRGB(20, 20, 28),
+    Section = Color3.fromRGB(18, 18, 24),
+    Button = Color3.fromRGB(35, 35, 45),
+    ButtonHover = Color3.fromRGB(70, 130, 180),
+    ButtonActive = Color3.fromRGB(85, 145, 195),
+    Slider = Color3.fromRGB(35, 35, 45),
     SliderFill = Color3.fromRGB(70, 130, 180),
     SliderHandle = Color3.fromRGB(90, 150, 200),
     Text = Color3.fromRGB(220, 220, 220),
@@ -50,11 +50,14 @@ local DefaultTheme = {
     -- Dimensions
     Padding = 8,
     Spacing = 6,
-    CornerRadius = UDim.new(0, 6),
+    CornerRadius = UDim.new(0, 8),
     BorderThickness = 1,
 
     -- Transparency
-    BackgroundTransparency = 0.05,
+    BackgroundTransparency = 0.3,
+    TitleBarTransparency = 0.2,
+    SectionTransparency = 0.4,
+    ButtonTransparency = 0.15,
 
     -- Animation
     AnimationSpeed = 0.2,
@@ -198,6 +201,7 @@ function TextBox:new(parent, config, theme)
     self.TextBox.Size = UDim2.new(1, 0, 0, 30)
     self.TextBox.Position = UDim2.new(0, 0, 0, 22)
     self.TextBox.BackgroundColor3 = theme.Button
+    self.TextBox.BackgroundTransparency = theme.ButtonTransparency
     self.TextBox.BorderSizePixel = 0
     self.TextBox.Font = Enum.Font.Gotham
     self.TextBox.TextSize = 14
@@ -251,7 +255,7 @@ function Button:new(parent, config, theme)
     -- Container
     self.Container = Instance.new("Frame")
     self.Container.Name = "ButtonContainer"
-    self.Container.Size = UDim2.new(1, 0, 0, 35)
+    self.Container.Size = UDim2.new(1, 0, 0, 38)
     self.Container.BackgroundTransparency = 1
     self.Container.Parent = parent
 
@@ -260,6 +264,7 @@ function Button:new(parent, config, theme)
     self.Button.Name = "Button"
     self.Button.Size = UDim2.new(1, 0, 1, 0)
     self.Button.BackgroundColor3 = theme.Button
+    self.Button.BackgroundTransparency = theme.ButtonTransparency
     self.Button.BorderSizePixel = 0
     self.Button.Font = Enum.Font.GothamSemibold
     self.Button.TextSize = 14
@@ -273,23 +278,32 @@ function Button:new(parent, config, theme)
     corner.CornerRadius = theme.CornerRadius
     corner.Parent = self.Button
 
+    -- Subtle border/stroke
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = theme.Accent
+    stroke.Thickness = 0
+    stroke.Transparency = 0.7
+    stroke.Parent = self.Button
+
     -- Events
     self.Callback = config.Callback or function() end
 
     self.Button.MouseEnter:Connect(function()
-        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonHover})
+        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonHover, BackgroundTransparency = 0})
+        CreateTween(stroke, {Thickness = 1.5, Transparency = 0})
     end)
 
     self.Button.MouseLeave:Connect(function()
-        CreateTween(self.Button, {BackgroundColor3 = theme.Button})
+        CreateTween(self.Button, {BackgroundColor3 = theme.Button, BackgroundTransparency = theme.ButtonTransparency})
+        CreateTween(stroke, {Thickness = 0, Transparency = 0.7})
     end)
 
     self.Button.MouseButton1Down:Connect(function()
-        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonActive}, 0.1)
+        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonActive, BackgroundTransparency = 0}, 0.1)
     end)
 
     self.Button.MouseButton1Up:Connect(function()
-        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonHover}, 0.1)
+        CreateTween(self.Button, {BackgroundColor3 = theme.ButtonHover, BackgroundTransparency = 0}, 0.1)
     end)
 
     self.Button.MouseButton1Click:Connect(function()
@@ -367,6 +381,7 @@ function Slider:new(parent, config, theme)
     self.SliderBack.Size = UDim2.new(1, 0, 0, 6)
     self.SliderBack.Position = UDim2.new(0, 0, 0, 30)
     self.SliderBack.BackgroundColor3 = theme.Slider
+    self.SliderBack.BackgroundTransparency = theme.ButtonTransparency
     self.SliderBack.BorderSizePixel = 0
     self.SliderBack.Parent = self.Container
 
@@ -477,6 +492,7 @@ function Section:new(parent, config, theme)
     self.Container.Name = "Section"
     self.Container.Size = UDim2.new(1, 0, 0, 100)
     self.Container.BackgroundColor3 = theme.Section
+    self.Container.BackgroundTransparency = theme.SectionTransparency
     self.Container.BorderSizePixel = 0
     self.Container.Parent = parent
 
@@ -489,6 +505,7 @@ function Section:new(parent, config, theme)
     self.TitleBar.Name = "TitleBar"
     self.TitleBar.Size = UDim2.new(1, 0, 0, 30)
     self.TitleBar.BackgroundColor3 = theme.TitleBar
+    self.TitleBar.BackgroundTransparency = theme.TitleBarTransparency
     self.TitleBar.BorderSizePixel = 0
     self.TitleBar.Font = Enum.Font.GothamBold
     self.TitleBar.TextSize = 14
@@ -596,6 +613,7 @@ function Window:new(parent, config, theme)
     self.Frame.Size = config.Size or UDim2.new(0, 400, 0, 500)
     self.Frame.Position = config.Position or UDim2.new(0.5, -200, 0.5, -250)
     self.Frame.BackgroundColor3 = theme.Background
+    self.Frame.BackgroundTransparency = theme.BackgroundTransparency
     self.Frame.BorderSizePixel = 0
     self.Frame.Active = true
     self.Frame.Parent = parent
@@ -609,6 +627,7 @@ function Window:new(parent, config, theme)
     self.TitleBar.Name = "TitleBar"
     self.TitleBar.Size = UDim2.new(1, 0, 0, 40)
     self.TitleBar.BackgroundColor3 = theme.TitleBar
+    self.TitleBar.BackgroundTransparency = theme.TitleBarTransparency
     self.TitleBar.BorderSizePixel = 0
     self.TitleBar.Parent = self.Frame
 
